@@ -30,12 +30,14 @@ csv-to-json:
 # GitLab Pages：将 JSON 文件发布为静态站点
 pages:
   stage: pages
-  image: alpine:latest
+  image: node:20-alpine
   needs: []
   script:
-    # 创建 public 目录，只拷贝 JSON 文件（排除 scripts 和其他非翻译文件）
+    # 先执行 CSV → JSON 转换（确保 public 中有最新的 JSON）
+    - node scripts/csv2json.mjs
+    # 将 JSON 文件复制到 public 目录
     - mkdir -p public
-    - find . -name "*.json" -not -path "./public/*" -not -path "./.git/*" -not -path "./node_modules/*" | while read f; do
+    - find . -name "*.json" -not -path "./public/*" -not -path "./.git/*" -not -path "./node_modules/*" -not -path "./scripts/*" | while read f; do
         dir=$(dirname "$f" | sed 's|^\./||');
         mkdir -p "public/$dir";
         cp "$f" "public/$dir/";
