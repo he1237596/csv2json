@@ -1,7 +1,6 @@
 stages:
-  - convert
+  - test
 
-csv-to-json:
-  stage: convert
+test:
   script:
-    - node -v
+    - echo "hello"
