@@ -1,8 +1,40 @@
 stages:
-  - test
+  - convert
+  - pages
 
-test:
+csv-to-json:
   tags:
     - docker    
+  stage: convert
+  image: node:20-alpine
+  before_script:
+  - apk add --no-cache git
   script:
-    - echo "hello"
+    - npm install || true
+    - node scripts/csv2json.js
+    - |
+      if [ -n "$(git status --porcelain)" ]; then
+        echo "有变化，提交..."
+        git config user.name "CI Bot"
+        git config user.email "ci-bot@gitlab.com"
+        git add .
+        git commit -m "auto: csv to json [skip ci]"
+        git push http://oauth2:${GITLAB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git HEAD:${CI_COMMIT_REF_NAME}
+      else
+        echo "没有变化"
+      fi
+
+pages:
+  tags:
+    - docker    
+  stage: pages
+  image: node:20-alpine
+  script:
+    - node scripts/csv2json.js
+    - mkdir -p public
+    - cp -r *.json public/ || true
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
