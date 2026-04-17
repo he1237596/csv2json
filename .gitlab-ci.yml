@@ -1,6 +1,8 @@
-csv-to-json:
-  stage: convert
+stages:
+  - test
+
+test:
   tags:
-    - docker        # 与 Runner 的 tags 匹配
+    - docker    
   script:
-    - node -v
+    - echo "hello"
