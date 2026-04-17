@@ -19,7 +19,7 @@ csv-to-json:
         git config user.email "ci-bot@gitlab.com"
         git add .
         git commit -m "auto: csv to json [skip ci]"
-        git push http://oauth2:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git HEAD:${CI_COMMIT_REF_NAME}
+        git push http://oauth2:${GITLAB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git HEAD:${CI_COMMIT_REF_NAME}
       else
         echo "没有变化"
       fi
