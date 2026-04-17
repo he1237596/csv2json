@@ -1,92 +1,280 @@
-# Language Resource
+# 🧩 多语言 CSV → JSON 自动化方案
 
+---
 
+## 1️⃣ 项目目标
 
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+实现一套自动化流程：
 
 ```
-cd existing_repo
-git remote add origin http://192.168.0.243/raoxiaochuan/language-resource.git
-git branch -M master
-git push -uf origin master
+CSV（多语言源） → 自动转换 → JSON → 提供访问
 ```
 
-## Integrate with your tools
+用于：
 
-- [ ] [Set up project integrations](http://192.168.0.243/raoxiaochuan/language-resource/-/settings/integrations)
+* 前端 i18n
+* 多项目共享语言资源
+* CI 自动同步
 
-## Collaborate with your team
+---
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+## 2️⃣ CSV 规范（⚠️ 很重要）
 
-## Test and Deploy
+### 📌 格式要求
 
-Use the built-in continuous integration in GitLab.
+```csv
+key,zh-CN,en,ja
+greeting,你好,Hello,こんにちは
+goodbye,再见,Goodbye,さようなら
+```
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+---
 
-***
+### 📌 强制规则
 
-# Editing this README
+* 第一列必须是 key
+* 后面列是语言代码
+* key 不允许重复
+* 空值不会写入 JSON（用于 fallback）
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+---
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+### 🚨 编码要求（重点）
 
-## Name
-Choose a self-explaining name for your project.
+必须使用 **UTF-8**
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+#### ❌ 错误情况（WPS 默认）
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+```
+GBK / ANSI → 会乱码
+```
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+#### ✅ 正确操作（WPS）
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+```
+另存为 → CSV UTF-8（逗号分隔）
+```
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+---
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+## 3️⃣ 转换脚本说明
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+**路径：**
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+```
+scripts/csv2json.js
+```
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+---
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+### ✨ 功能
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+* 自动扫描所有 CSV
+* 自动生成多语言 JSON
+* 自动识别编码（UTF-8 / GBK）
+* 自动去 BOM
+* 无变化不重复写入
 
-## License
-For open source projects, say how it is licensed.
+---
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+### 📌 输出示例
+
+```json
+// zh-CN.json
+{
+  "greeting": "你好",
+  "goodbye": "再见"
+}
+```
+
+---
+
+## 4️⃣ GitLab CI 配置（核心）
+
+### 📄 `.gitlab-ci.yml`
+
+```yaml
+image: node:20-alpine
+
+stages:
+  - convert
+  - pages
+
+csv-to-json:
+  stage: convert
+  rules:
+    - changes:
+        - "**/*.csv"
+  before_script:
+    - npm install
+    - git config user.name "CI Bot"
+    - git config user.email "ci-bot@gitlab.com"
+  script:
+    - echo "🚀 CSV → JSON 转换"
+    - node scripts/csv2json.js
+
+    - |
+      if [ -n "$(git status --porcelain)" ]; then
+        echo "有变化，提交..."
+        git add .
+        git commit -m "auto: csv to json [skip ci]"
+        git push http://oauth2:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git HEAD:${CI_COMMIT_REF_NAME}
+      else
+        echo "无变化"
+      fi
+
+pages:
+  stage: pages
+  script:
+    - node scripts/csv2json.js
+    - mkdir -p public
+    - cp -r simmobile public/
+    - cp -r simpro public/
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+```
+
+---
+
+## 5️⃣ CI 关键点说明
+
+### ❗ 1. 为什么要 `npm install`
+
+```
+CI 是全新容器，没有 node_modules
+```
+
+必须执行：
+
+```bash
+npm install
+```
+
+否则：
+
+```
+Cannot find package 'iconv-lite'
+```
+
+---
+
+### ❗ 2. git push 失败
+
+报错：
+
+```
+Authentication failed
+```
+
+解决：
+
+```bash
+git push http://oauth2:${CI_JOB_TOKEN}@...
+```
+
+---
+
+### ❗ 3. detached HEAD 问题
+
+CI 默认：
+
+```
+不是在分支上
+```
+
+必须：
+
+```bash
+git push ... HEAD:${CI_COMMIT_REF_NAME}
+```
+
+---
+
+### ❗ 4. Runner 网络问题
+
+报错：
+
+```
+no route to host
+```
+
+原因：
+
+```
+Runner 容器访问不到 GitLab
+```
+
+解决：
+
+* Runner 与 GitLab 在同一网络
+* 或使用公网地址
+
+---
+
+## 6️⃣ JSON 访问方式
+
+### 方式一（推荐）
+
+```
+GitLab Pages
+http://<your-domain>/<project>/zh-CN.json
+```
+
+---
+
+### 方式二（不推荐）
+
+```
+/raw/main/xxx.json
+```
+
+问题：
+
+```
+需要登录
+```
+
+解决：
+
+* 项目设为 public
+* 或使用 Pages
+
+---
+
+## 7️⃣ 架构流程
+
+```
+CSV（WPS/Excel）
+   ↓
+Git push
+   ↓
+GitLab CI
+   ↓
+csv2json.js
+   ↓
+JSON 文件
+   ↓
+GitLab Pages / API
+   ↓
+前端 i18n 使用
+```
+
+---
+
+## 📌 总结
+
+这套方案本质是：
+
+> 一个轻量级多语言管理系统（i18n）
+
+具备：
+
+* 自动化
+* 可扩展
+* 可 CI/CD 集成
+* 适合中小团队快速落地
+
+---
