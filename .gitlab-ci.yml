@@ -13,12 +13,15 @@ csv-to-json:
     - npm install || true
     - node scripts/csv2json.js
     - |
-      if git diff --quiet --exit-code $(git ls-files '*.json'); then
-        echo "✅ JSON 文件无变化"
-      else
-        git add $(git ls-files '*.json')
+      if [ -n "$(git status --porcelain)" ]; then
+        echo "有变化，提交..."
+        git config user.name "CI Bot"
+        git config user.email "ci-bot@gitlab.com"
+        git add .
         git commit -m "auto: csv to json [skip ci]"
         git push https://oauth2:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git HEAD:${CI_COMMIT_REF_NAME}
+      else
+        echo "没有变化"
       fi
 
 pages:
