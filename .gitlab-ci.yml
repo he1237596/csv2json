@@ -1,50 +1,6 @@
 stages:
-  - convert
-  - pages
+  - test
 
-# 仅当 CSV 文件变更时触发
-csv-to-json:
-  stage: convert
-  image: node:20-alpine
-  rules:
-    - changes:
-        - "**/*.csv"
-  before_script:
-    - apk add --no-cache git
-    - git config user.name "CI Bot"
-    - git config user.email "ci-bot@gitlab.com"
+test:
   script:
-    - echo "🚀 检测到 CSV 变更，开始转换..."
-    - node scripts/csv2json.mjs
-    - |
-      if git diff --quiet --exit-code *.json "**/*.json"; then
-        echo "✅ JSON 文件无变化，跳过提交"
-      else
-        git add "**/*.json"
-        git commit -m "chore: auto-convert CSV to JSON [skip ci]"
-        git push https://oauth2:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git HEAD:${CI_COMMIT_REF_NAME}
-        echo "✅ JSON 文件已提交"
-      fi
-  # 避免循环触发：commit message 含 [skip ci] 不会再次触发 pipeline
-
-# GitLab Pages：将 JSON 文件发布为静态站点
-pages:
-  stage: pages
-  image: node:20-alpine
-  needs: []
-  script:
-    # 先执行 CSV → JSON 转换（确保 public 中有最新的 JSON）
-    - node scripts/csv2json.mjs
-    # 将 JSON 文件复制到 public 目录
-    - mkdir -p public
-    - find . -name "*.json" -not -path "./public/*" -not -path "./.git/*" -not -path "./node_modules/*" -not -path "./scripts/*" | while read f; do
-        dir=$(dirname "$f" | sed 's|^\./||');
-        mkdir -p "public/$dir";
-        cp "$f" "public/$dir/";
-      done
-    - echo "✅ Pages 准备完成"
-  artifacts:
-    paths:
-      - public
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - echo "hello"
