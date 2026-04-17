@@ -9,7 +9,7 @@ csv-to-json:
   image: node:20-alpine
   script:
     - npm install || true
-    - node scripts/csv2json.mjs
+    - node scripts/csv2json.js
     - |
       if git diff --quiet --exit-code $(git ls-files '*.json'); then
         echo "✅ JSON 文件无变化"
@@ -25,7 +25,7 @@ pages:
   stage: pages
   image: node:20-alpine
   script:
-    - node scripts/csv2json.mjs
+    - node scripts/csv2json.js
     - mkdir -p public
     - cp -r *.json public/ || true
   artifacts:
