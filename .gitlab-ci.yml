@@ -6,7 +6,9 @@ csv-to-json:
   tags:
     - docker    
   stage: convert
-  image: node:20
+  image: node:20-alpine
+  before_script:
+  - apk add --no-cache git
   script:
     - npm install || true
     - node scripts/csv2json.js
@@ -26,7 +28,7 @@ pages:
   tags:
     - docker    
   stage: pages
-  image: node:20
+  image: node:20-alpine
   script:
     - node scripts/csv2json.js
     - mkdir -p public
