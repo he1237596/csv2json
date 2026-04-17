@@ -1,3 +1,6 @@
+stages:
+  - convert
+
 csv-to-json:
   stage: convert
   script:
