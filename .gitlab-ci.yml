@@ -1,8 +1,35 @@
 stages:
-  - test
+  - convert
+  - pages
 
-test:
+csv-to-json:
   tags:
     - docker    
+  stage: convert
+  image: node:20-alpine
   script:
-    - echo "hello"
+    - npm install || true
+    - node scripts/csv2json.mjs
+    - |
+      if git diff --quiet --exit-code $(git ls-files '*.json'); then
+        echo "✅ JSON 文件无变化"
+      else
+        git add $(git ls-files '*.json')
+        git commit -m "auto: csv to json [skip ci]"
+        git push https://oauth2:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git HEAD:${CI_COMMIT_REF_NAME}
+      fi
+
+pages:
+  tags:
+    - docker    
+  stage: pages
+  image: node:20-alpine
+  script:
+    - node scripts/csv2json.mjs
+    - mkdir -p public
+    - cp -r *.json public/ || true
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
