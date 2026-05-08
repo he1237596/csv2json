@@ -5,6 +5,7 @@ on:
     branches: [master, main]
     paths:
       - '**/*.csv'
+  workflow_dispatch:
 
 jobs:
   convert-and-commit:
@@ -32,3 +33,40 @@ jobs:
           else
             echo "没有变化"
           fi
+          
+  deploy-pages:
+    needs: convert-and-commit
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm install
+      - run: node scripts/csv2json.js
+
+      - name: Prepare pages
+        run: |
+          mkdir -p public/simpro public/simmobile
+          cp simpro/*.json public/simpro/ 2>/dev/null || true
+          cp simmobile/*.json public/simmobile/ 2>/dev/null || true
+          # 为每个目录生成索引页
+          for dir in public public/simpro public/simmobile; do
+            echo "<h1>Language Resources</h1><pre>$(ls $dir/*.json 2>/dev/null | xargs -I{} basename {} | sort)</pre>" > "$dir/index.html"
+          done
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
