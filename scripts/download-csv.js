@@ -4,7 +4,7 @@ import { join, basename } from 'path'
 const API_URL = 'https://xonrngcdkvcvslnlwhis.supabase.co/functions/v1/export-csv'
 
 // 用法: node scripts/download-csv.js [项目名1 项目名2 ...]
-// 不传参则自动扫描 projects/ 和当前目录下的子文件夹
+// 不传参则自动扫描 projects/ 下的子文件夹
 async function downloadCsv(projectName, targetDir) {
   const url = `${API_URL}?project=${encodeURIComponent(projectName)}`
   console.log(`  ↓ 下载: ${projectName} → ${url}`)
@@ -33,7 +33,7 @@ async function downloadCsv(projectName, targetDir) {
 function findProjectDirs(root) {
   const results = []
 
-  // 扫描 projects/ 目录
+  // 扫描 projects/ 目录下的所有子文件夹
   const projectsDir = join(root, 'projects')
   if (existsSync(projectsDir)) {
     for (const entry of readdirSync(projectsDir)) {
@@ -41,17 +41,6 @@ function findProjectDirs(root) {
       if (statSync(fullPath).isDirectory() && !entry.startsWith('.')) {
         results.push({ name: entry, dir: fullPath })
       }
-    }
-  }
-
-  // 扫描根目录下包含 translations.csv 的子文件夹（排除 projects、scripts、.github 等）
-  const skipDirs = ['projects', 'scripts', 'node_modules', '.git', '.github', '.codebuddy']
-  for (const entry of readdirSync(root)) {
-    const fullPath = join(root, entry)
-    if (!statSync(fullPath).isDirectory()) continue
-    if (skipDirs.includes(entry) || entry.startsWith('.')) continue
-    if (existsSync(join(fullPath, 'translations.csv'))) {
-      results.push({ name: entry, dir: fullPath })
     }
   }
 
@@ -65,12 +54,9 @@ async function main() {
   let projects = []
 
   if (args.length > 0) {
-    // 手动指定项目名
+    // 手动指定项目名，下载到 projects/ 下
     for (const name of args) {
-      // 优先 projects/ 下查找，其次根目录
-      const projectDir = join(root, 'projects', name)
-      const rootDir = join(root, name)
-      const dir = existsSync(projectDir) ? projectDir : existsSync(rootDir) ? rootDir : projectDir
+      const dir = join(root, 'projects', name)
       projects.push({ name, dir })
     }
   } else {
@@ -85,8 +71,7 @@ async function main() {
     console.log('  node scripts/download-csv.js                     # 自动扫描')
     console.log()
     console.log('自动扫描规则:')
-    console.log('  1. projects/ 下的子文件夹')
-    console.log('  2. 根目录下含 translations.csv 的子文件夹')
+    console.log('  projects/ 下的所有子文件夹')
     return
   }
 

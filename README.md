@@ -50,16 +50,17 @@ language-resource/
 ├── scripts/
 │   ├── download-csv.js              # 从 Supabase 下载 CSV
 │   └── csv2json.js                  # CSV → JSON 转换
-├── simpro/
-│   ├── translations.csv             # 源文件
-│   ├── zh-CN.json                   # 生成的 JSON
-│   ├── en-US.json
-│   └── ...
-└── simmobile/
-    ├── translations.csv
-    ├── zh-CN.json
-    ├── en-US.json
-    └── ...
+└── projects/
+    ├── simpro/
+    │   ├── translations.csv         # 源文件
+    │   ├── zh-CN.json               # 生成的 JSON
+    │   ├── en-US.json
+    │   └── ...
+    └── simmobile/
+        ├── translations.csv
+        ├── zh-CN.json
+        ├── en-US.json
+        └── ...
 ```
 
 ---
@@ -89,8 +90,7 @@ npm run build
 
 ### 自动扫描规则
 
-1. `projects/` 下的子文件夹
-2. 根目录下包含 `translations.csv` 的子文件夹（排除 scripts、node_modules 等）
+- 扫描 `projects/` 下的所有子文件夹，每个子文件夹对应一个项目
 
 ---
 
@@ -213,11 +213,11 @@ https://<用户名>.github.io/<仓库名>/simmobile/zh-CN.json
 
 ## 新增项目
 
-1. 在仓库根目录创建新文件夹（如 `newapp/`）
+1. 在 `projects/` 下创建新文件夹（如 `projects/newapp/`）
 2. 在 Supabase 翻译平台中创建对应项目
 3. 推送后 CI 自动下载 CSV 并生成 JSON
 
-如需 Pages 发布，在 CI 配置的 `cp` 命令中添加对应目录。
+Pages 会自动发布 `projects/` 下所有项目的 JSON 文件，无需额外配置。
 
 ---
 

@@ -68,9 +68,8 @@ pages:
     - npm install
   script:
     - node scripts/csv2json.js
-    - mkdir -p public/simpro public/simmobile
-    - cp simpro/*.json public/simpro/ 2>/dev/null || true
-    - cp simmobile/*.json public/simmobile/ 2>/dev/null || true
+    - mkdir -p public
+    - cp -r projects/*/ public/ 2>/dev/null || true
   artifacts:
     paths:
       - public
