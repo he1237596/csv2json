@@ -1,1 +1,6 @@
-{}
+{
+  "common.confirm": "Confirmado",
+  "home.tabBar.home": "Home",
+  "common.cancel": "Cancelar",
+  "home.tabBar.dashlib": "Instrumento"
+}

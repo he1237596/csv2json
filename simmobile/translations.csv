@@ -1,38 +1,7 @@
-key,zh-CN,zh-TW,en-US,es-ES,fr-FR,it-IT,ja-JP,ko-KR
-common.cancel,È¡Ïû,,Cancel,,,,,
-common.save,±£´æ,,Save,,,,,
-,,,,,,,,
-,Á¬½Ó,,Connect,,,,,
-,ÒÑÁ¬½Ó,,Connected,,,,,
-,Î´Á¬½Ó,,,,,,,
-home.tabBar.home,Ê×Ò³,,Home,,,,,
-home.quickView,Éè±¸ËÙÀÀ,,Quick View,,,,,
-,ÎŞÉè±¸,,No devices,,,,,
-,»ù×ù,,Base,,,,,
-,·½ÏòÅÌ,,Wheel,,,,,
-,Ì¤°å,,Pedals,,,,,
-,ÅÅµµ,,Shifter,,,,,
-,ÊÖÉ²,,Handbrake,,,,,
-,ËùÓĞÉè±¸,,All Devices,,,,,
-,²é¿´¸ü¶à,,read more,,,,,
-home.quickEntry,¿ìËÙÈë¿Ú,,Quick Entry,,,,,
-home.news,ĞÂÎÅ,,News,,,,,
-home.tabBar.devices,Éè±¸,,Devices,,,,,
-,ÎÒµÄÉè±¸,,My Devices,,,,,
-home.tabBar.dashboard,ÒÇ±í,,Dashboard,,,,,
-dashboard.mouseMode.title,Êó±êÄ£Ê½,,Mouse Mode,,,,,
-dashboard.mouseMode.hint,½øÈëÃæ°å¿ØÖÆµçÄÔÊó±ê,,Enter to take over PC mouse control,,,,,
-dashboard.run,ÔËĞĞ,,RUN,,,,,
-dashboard.mouseMode.open,¿ªÆô,,Open,,,,,
-home.tabBar.discover,·¢ÏÖ,,Discover,,,,,
-home.tabBar.profile,ÎÒµÄ,,Profile,,,,,
-profile.setting.accountManager,ÕË»§¹ÜÀí,,Account Management,,,,,
-profile.setting.feedback,Òâ¼û·´À¡,,Feedback,,,,,
-profile.setting.checkUpdate,¼ì²é¸üĞÂ,,Check Updates,,,,,
-profile.setting.about,¹ØÓÚ,,About,,,,,
-profile.setting.signOut,ÍË³ö,,Sign Out,,,,,
-profile.setting.connectSettings,µçÄÔÁ¬½ÓÉèÖÃ,,PC Connection Settings,,,,,
-profile.setting.language,ÓïÑÔ,,Language,,,,,
-profile.setting.theme,Ö÷Ìâ,,Theme,,,,,
-name,Ãû×Ö,,,,,,,
-,dd,,,,,,,
+key,zh-CN,zh-TW,en-US,ja-JP,ko-KR,fr-FR,it-IT,es-ES
+common.confirm,ç¡®è®¤,ç¢ºèª,confirmed,ç¢ºèªæ¸ˆã¿ã€‚,í™•ì¸,Confirmation,conferma,Confirmado
+home.tabBar.home,é¦–é¡µ,é¦–é ,Home,ãƒˆãƒƒãƒ—ãƒšãƒ¼ã‚¸>,í™ˆí˜ì´ì§€,Home Page,Pagina principale,Home
+common.cancel,å–æ¶ˆ,å–æ¶ˆ,cancel,ã‚­ãƒ£ãƒ³ã‚»ãƒ«ã€‚,ì·¨ì†Œ,Annulation,Annullare,Cancelar
+home.tabBar.dashlib,ä»ªè¡¨,å„€å™¨,instrument,è¨ˆå™¨ç³»ã®,ê³„ê¸°,Instrumentation,strumento,Instrumento
+,è®¾å¤‡,è¨­å‚™,"Devices
+",è£…å‚™å“ã¯,,Equipement,,Equipo

@@ -1,1 +1,6 @@
-{}
+{
+  "common.confirm": "確認",
+  "home.tabBar.home": "首頁",
+  "common.cancel": "取消",
+  "home.tabBar.dashlib": "儀器"
+}

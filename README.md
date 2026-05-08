@@ -1,92 +1,226 @@
-# Language Resource
+# 多语言 CSV → JSON 自动化方案
 
+---
 
+## 项目目标
 
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+实现一套自动化流程：
 
 ```
-cd existing_repo
-git remote add origin http://192.168.0.243/raoxiaochuan/language-resource.git
-git branch -M master
-git push -uf origin master
+Supabase 翻译平台 → CSV 下载 → JSON 转换 → 提交回仓库 + Pages 发布
 ```
 
-## Integrate with your tools
+用于：
 
-- [ ] [Set up project integrations](http://192.168.0.243/raoxiaochuan/language-resource/-/settings/integrations)
+- 前端 i18n
+- 多项目共享语言资源
+- CI 自动同步
 
-## Collaborate with your team
+---
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+## CSV 规范
 
-## Test and Deploy
+### 格式要求
 
-Use the built-in continuous integration in GitLab.
+```csv
+key,zh-CN,en,ja
+greeting,你好,Hello,こんにちは
+goodbye,再见,Goodbye,さようなら
+```
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+### 强制规则
 
-***
+- 第一列必须是 key
+- 后面列是语言代码
+- key 不允许重复
+- 空值不会写入 JSON（用于 fallback）
 
-# Editing this README
+### 编码要求
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+必须使用 **UTF-8**（WPS 另存为 → CSV UTF-8（逗号分隔））。脚本也会自动尝试 GBK 解码作为兜底。
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+---
 
-## Name
-Choose a self-explaining name for your project.
+## 项目结构
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+```
+language-resource/
+├── .github/workflows/convert.yml   # GitHub Actions CI
+├── .gitlab-ci.yml                   # GitLab CI
+├── scripts/
+│   ├── download-csv.js              # 从 Supabase 下载 CSV
+│   └── csv2json.js                  # CSV → JSON 转换
+├── simpro/
+│   ├── translations.csv             # 源文件
+│   ├── zh-CN.json                   # 生成的 JSON
+│   ├── en-US.json
+│   └── ...
+└── simmobile/
+    ├── translations.csv
+    ├── zh-CN.json
+    ├── en-US.json
+    └── ...
+```
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+---
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+## 本地使用
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+```bash
+npm install
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+# 从 Supabase 下载最新 CSV
+npm run download -- simmobile simpro    # 指定项目
+npm run download                        # 自动扫描
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+# CSV → JSON 转换
+npm run convert
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+# 下载 + 转换一步完成
+npm run build
+```
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+### 脚本说明
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+| 脚本 | 说明 |
+|------|------|
+| `scripts/download-csv.js` | 从 Supabase Edge Function 下载各项目的 CSV 文件 |
+| `scripts/csv2json.js` | 扫描所有 CSV，按语言列拆分为 JSON 文件 |
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+### 自动扫描规则
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+1. `projects/` 下的子文件夹
+2. 根目录下包含 `translations.csv` 的子文件夹（排除 scripts、node_modules 等）
 
-## License
-For open source projects, say how it is licensed.
+---
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+## GitLab CI
+
+### 配置文件
+
+`.gitlab-ci.yml`
+
+### 前置配置
+
+1. **创建 Access Token**
+
+   项目 → Settings → Repository → Push mirror 或 Access Tokens
+
+   - Name: `csv2json-ci`
+   - Scopes: `api`, `write_repository`
+
+2. **配置 CI Variable**
+
+   项目 → Settings → CI/CD → Variables → Add variable
+
+   - Key: `GITLAB_TOKEN`
+   - Value: 上一步创建的 token
+   - 勾选 Masked
+
+3. **Runner 要求**
+
+   需要有带 `docker` tag 的 Runner。
+
+### 流程
+
+```
+定时/手动触发
+    ↓
+download-csv（从 Supabase 下载 CSV → 推送）
+    ↓ 自动触发新 pipeline（因为 CSV 变更）
+csv-to-json（CSV → JSON → 带 [skip ci] 推送）
+    ↓ 无变化，终止链式触发
+```
+
+### 各阶段触发条件
+
+| 阶段 | 触发条件 |
+|------|---------|
+| `download` | 定时任务、手动触发、脚本/配置变更 |
+| `convert` | CSV 文件变更、转换脚本变更、手动触发 |
+| `pages` | 仅默认分支 |
+
+### JSON 访问地址
+
+```
+https://<gitlab-domain>/pages/<namespace>/<project>/simpro/en-US.json
+```
+
+---
+
+## GitHub Actions
+
+### 配置文件
+
+`.github/workflows/convert.yml`
+
+### 前置配置
+
+1. **创建 Personal Access Token**
+
+   GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens
+
+   - Name: `csv2json-ci`
+   - Repository: 选择当前仓库
+   - Permissions → Contents: **Read and write**
+
+2. **添加 Repository Secret**
+
+   仓库 → Settings → Secrets and variables → Actions → New repository secret
+
+   - Name: `PAT_TOKEN`
+   - Value: 上一步创建的 token
+
+3. **开启 GitHub Pages**
+
+   仓库 → Settings → Pages → Source 选择 **GitHub Actions**
+
+### 各 Job 说明
+
+| Job | 说明 |
+|-----|------|
+| `convert-and-commit` | CSV 转 JSON，有变更时自动提交回仓库 |
+| `deploy-pages` | 将 JSON 发布到 GitHub Pages（仅 master/main 分支） |
+
+### 触发条件
+
+- 推送 `**/*.csv` 文件变更时自动触发
+- 可在 Actions 页面手动点击 **Run workflow** 触发
+
+### JSON 访问地址
+
+```
+https://<用户名>.github.io/<仓库名>/simpro/en-US.json
+https://<用户名>.github.io/<仓库名>/simmobile/zh-CN.json
+```
+
+---
+
+## 新增项目
+
+1. 在仓库根目录创建新文件夹（如 `newapp/`）
+2. 在 Supabase 翻译平台中创建对应项目
+3. 推送后 CI 自动下载 CSV 并生成 JSON
+
+如需 Pages 发布，在 CI 配置的 `cp` 命令中添加对应目录。
+
+---
+
+## 常见问题
+
+### Q: npm install 报错
+
+CI 环境是全新容器，必须安装依赖。本地开发前也需先执行 `npm install`。
+
+### Q: 自动提交失败（Authentication failed）
+
+- **GitHub**: 检查 `PAT_TOKEN` 是否有 `Contents: Read and write` 权限
+- **GitLab**: 检查 `GITLAB_TOKEN` 是否有 `write_repository` scope
+
+### Q: GitHub Pages 部署失败（404 Not Found）
+
+确保仓库 Settings → Pages → Source 已选择 **GitHub Actions**。
+
+### Q: build 命令下载部分失败怎么办
+
+`npm run build` 中即使下载失败也会继续执行转换，不会中断。

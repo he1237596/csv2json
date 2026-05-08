@@ -1,10 +1,12 @@
 {
   "name": "language-resource",
   "version": "1.0.0",
-  "description": "To make it easy for you to get started with GitLab, here's a list of recommended next steps.",
+  "description": "CSV → JSON 多语言自动化转换工具",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "download": "node scripts/download-csv.js",
+    "convert": "node scripts/csv2json.js",
+    "build": "node scripts/download-csv.js; node scripts/csv2json.js"
   },
   "keywords": [],
   "author": "",
