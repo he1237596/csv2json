@@ -1,6 +1,6 @@
 {
   "common.confirm": "confirmed",
   "home.tabBar.home": "Home",
-  "common.cancel": "cancel",
-  "home.tabBar.dashlib": "instrument"
+  "home.tabBar.dashlib": "instrument",
+  "common.cancel": "cancel"
 }

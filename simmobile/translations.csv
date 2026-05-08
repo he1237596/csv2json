@@ -1,7 +1,7 @@
 key,zh-CN,zh-TW,en-US,ja-JP,ko-KR,fr-FR,it-IT,es-ES
 common.confirm,确认,確認,confirmed,確認済み。,확인,Confirmation,conferma,Confirmado
 home.tabBar.home,首页,首頁,Home,トップページ>,홈페이지,Home Page,Pagina principale,Home
-common.cancel,取消,取消,cancel,キャンセル。,취소,Annulation,Annullare,Cancelar
 home.tabBar.dashlib,仪表,儀器,instrument,計器系の,계기,Instrumentation,strumento,Instrumento
-,设备,設備,"Devices
+,设备,,"Devices
 ",装備品は,,Equipement,,Equipo
+common.cancel,取消,取消,cancel,キャンセル。,취소,Annulation,Annullare,Cancelar123

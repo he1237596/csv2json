@@ -1,6 +1,6 @@
 {
   "common.confirm": "확인",
   "home.tabBar.home": "홈페이지",
-  "common.cancel": "취소",
-  "home.tabBar.dashlib": "계기"
+  "home.tabBar.dashlib": "계기",
+  "common.cancel": "취소"
 }

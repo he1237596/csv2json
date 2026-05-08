@@ -1,6 +1,6 @@
 {
   "common.confirm": "Confirmation",
   "home.tabBar.home": "Home Page",
-  "common.cancel": "Annulation",
-  "home.tabBar.dashlib": "Instrumentation"
+  "home.tabBar.dashlib": "Instrumentation",
+  "common.cancel": "Annulation"
 }

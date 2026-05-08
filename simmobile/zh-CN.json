@@ -1,6 +1,6 @@
 {
   "common.confirm": "确认",
   "home.tabBar.home": "首页",
-  "common.cancel": "取消",
-  "home.tabBar.dashlib": "仪表"
+  "home.tabBar.dashlib": "仪表",
+  "common.cancel": "取消"
 }

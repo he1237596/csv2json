@@ -76,7 +76,7 @@ npm run download                        # 自动扫描
 # CSV → JSON 转换
 npm run convert
 
-# 下载 + 转换一步完成
+# 下载 + 转换一步完成（下载失败也会继续转换）
 npm run build
 ```
 
@@ -104,7 +104,7 @@ npm run build
 
 1. **创建 Access Token**
 
-   项目 → Settings → Repository → Push mirror 或 Access Tokens
+   项目 → Settings → Repository → Access Tokens
 
    - Name: `csv2json-ci`
    - Scopes: `api`, `write_repository`
@@ -115,35 +115,55 @@ npm run build
 
    - Key: `GITLAB_TOKEN`
    - Value: 上一步创建的 token
-   - 勾选 Masked
+   - 勾选 Mask variable
 
-3. **Runner 要求**
+3. **配置定时任务**（可选）
+
+   项目 → Settings → CI/CD → Schedules → New schedule
+
+   - Interval: 选择频率（如每天）
+   - Cron timezone: `Asia/Shanghai`
+   - Target branch: `master`
+   - Cron pattern: `0 2 * * *`（每天凌晨 2 点）
+
+4. **Runner 要求**
 
    需要有带 `docker` tag 的 Runner。
 
-### 流程
+### Job 说明
 
-```
-定时/手动触发
-    ↓
-download-csv（从 Supabase 下载 CSV → 推送）
-    ↓ 自动触发新 pipeline（因为 CSV 变更）
-csv-to-json（CSV → JSON → 带 [skip ci] 推送）
-    ↓ 无变化，终止链式触发
-```
+| Job | 说明 | 触发条件 |
+|-----|------|---------|
+| `sync-all` | 下载 CSV + 转换 JSON，一次性提交 | 定时任务、手动触发（Run pipeline） |
+| `csv-to-json` | 仅转换 JSON，无变化不提交 | CSV 文件变更、转换脚本变更 |
+| `pages` | 将 JSON 发布到 GitLab Pages | 仅默认分支 |
 
-### 各阶段触发条件
+### 各场景执行情况（仅默认分支）
 
-| 阶段 | 触发条件 |
-|------|---------|
-| `download` | 定时任务、手动触发、脚本/配置变更 |
-| `convert` | CSV 文件变更、转换脚本变更、手动触发 |
-| `pages` | 仅默认分支 |
+| 场景 | sync-all | csv-to-json | pages |
+|------|----------|-------------|-------|
+| 定时任务触发 | ✅ 下载+转换 | 跳过 | ✅ |
+| 手动 Run pipeline | ✅ 下载+转换 | 跳过 | ✅ |
+| 手动改 CSV 推送 | 跳过 | ✅ 自动转换 | ✅ |
+| 修改 `csv2json.js` 推送 | 跳过 | ✅ 自动转换 | ✅ |
+| 修改其他文件推送 | 跳过 | 跳过 | ✅ |
+| 下载接口挂了，手动改 CSV | 跳过 | ✅ 自动转换 | ✅ |
+
+> **pages 说明**：只要推送到默认分支就会执行，不管文件是否有变化。内容相同时不会产生实际更新。
+
+### 设计要点
+
+- `sync-all` 将下载和转换合并为同一个 job，避免跨 job 文件不共享的问题
+- `csv-to-json` 通过 `when: never` 排除 schedule/web 触发，避免与 sync-all 重复执行
+- `csv-to-json` 无 JSON 变化时不提交，不会触发无意义的 pipeline
+- 所有推送前执行 `git pull --rebase`，防止远程有新提交导致冲突
+- 推送消息带 `[skip ci]`，避免无限循环触发
 
 ### JSON 访问地址
 
 ```
 https://<gitlab-domain>/pages/<namespace>/<project>/simpro/en-US.json
+https://<gitlab-domain>/pages/<namespace>/<project>/simmobile/zh-CN.json
 ```
 
 ---
@@ -175,17 +195,12 @@ https://<gitlab-domain>/pages/<namespace>/<project>/simpro/en-US.json
 
    仓库 → Settings → Pages → Source 选择 **GitHub Actions**
 
-### 各 Job 说明
+### Job 说明
 
-| Job | 说明 |
-|-----|------|
-| `convert-and-commit` | CSV 转 JSON，有变更时自动提交回仓库 |
-| `deploy-pages` | 将 JSON 发布到 GitHub Pages（仅 master/main 分支） |
-
-### 触发条件
-
-- 推送 `**/*.csv` 文件变更时自动触发
-- 可在 Actions 页面手动点击 **Run workflow** 触发
+| Job | 说明 | 触发条件 |
+|-----|------|---------|
+| `convert-and-commit` | CSV 转 JSON，有变更时自动提交回仓库 | CSV 文件变更、手动 Run workflow |
+| `deploy-pages` | 将 JSON 发布到 GitHub Pages | 仅 master/main 分支 |
 
 ### JSON 访问地址
 
@@ -216,6 +231,10 @@ CI 环境是全新容器，必须安装依赖。本地开发前也需先执行 `
 
 - **GitHub**: 检查 `PAT_TOKEN` 是否有 `Contents: Read and write` 权限
 - **GitLab**: 检查 `GITLAB_TOKEN` 是否有 `write_repository` scope
+
+### Q: 推送失败（non-fast-forward）
+
+CI 推送前已配置 `git pull --rebase`，通常不会出现此问题。如果仍出现，说明有两个 CI 同时运行并修改了同分支，需避免并发。
 
 ### Q: GitHub Pages 部署失败（404 Not Found）
 

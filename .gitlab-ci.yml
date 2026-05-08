@@ -29,7 +29,7 @@ sync-all:
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_PIPELINE_SOURCE == "web"
 
-# 默认分支推送 / CSV 变更 / 脚本变更：仅转换 JSON
+# CSV / 脚本变更时：仅转换 JSON
 csv-to-json:
   tags:
     - docker
@@ -52,8 +52,8 @@ csv-to-json:
         echo "JSON 没有变化"
       fi
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      when: manual
+    - if: $CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "web"
+      when: never
     - changes:
         - '**/*.csv'
     - changes:
