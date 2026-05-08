@@ -1,0 +1,34 @@
+name: CSV to JSON
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - '**/*.csv'
+
+jobs:
+  convert-and-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm install
+      - run: node scripts/csv2json.js
+
+      - name: Commit changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "CI Bot"
+            git config user.email "ci-bot@github.com"
+            git add .
+            git commit -m "auto: csv to json [skip ci]"
+            git push
+          else
+            echo "没有变化"
+          fi
